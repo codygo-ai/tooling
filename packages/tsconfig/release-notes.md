@@ -1,5 +1,4 @@
-# Initial Alpha Release
+# Release Notes - v0.1.1-alpha
 
-- Add base TypeScript configuration for Codygo AI projects
-- Configure package with automated GitHub Actions release workflow
-- Establish npm package structure with proper formatting and linting
+- Dependency updates and maintenance changes
+- Package configuration improvements
