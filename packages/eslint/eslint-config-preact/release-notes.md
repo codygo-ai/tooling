@@ -1,3 +1,3 @@
-# v0.2.0-alpha
+## Stable release
 
-- Add initial README documentation for ESLint configuration and TypeScript settings
+- Promote to stable version 0.2.0 (from 0.2.0-alpha)
