@@ -1,4 +1,3 @@
-# Release Notes - v0.1.1-alpha
+# v0.1.2-alpha
 
-- Dependency updates and maintenance changes
-- Package configuration improvements
+- No notable changes in this release
