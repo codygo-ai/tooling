@@ -178,7 +178,7 @@ ${log || '(no commits)'}
 
 Write concise release notes in Markdown: a short title line, then a bullet list of changes. No preamble. Output only the release notes.`;
 
-  const claudeResult = spawnSync('claude', ['--no-input'], {
+  const claudeResult = spawnSync('claude', ['--print'], {
     input: prompt,
     encoding: 'utf-8',
     shell: true,
