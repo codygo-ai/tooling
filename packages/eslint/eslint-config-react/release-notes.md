@@ -1,7 +1,6 @@
-# Initial Alpha Release
+## Stable Release
 
-- Initial release of @codygo-ai/eslint-config-react
-- ESLint configuration for React projects
-- Removed private flag to enable npm publishing
-- Updated lint script configuration
-- Added GitHub Actions release workflow
+- Promoted from alpha to stable (v0.1.0)
+- React ESLint configuration with support for React 18+
+- Includes `eslint-plugin-react` and `eslint-plugin-react-refresh`
+- Built on `@codygo-ai/eslint-config-preact` foundation
