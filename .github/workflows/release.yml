@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.CODYGO_AI_NPM_TOKEN }}
     steps:
       - name: Parse tag
         id: parse
@@ -53,6 +55,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
 
       - name: Install
@@ -105,5 +108,3 @@ jobs:
             echo "::error::No package was published (package may be private or version already exists). See stdout/stderr above."
             exit 1
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.CODYGO_AI_NPM_TOKEN }}
