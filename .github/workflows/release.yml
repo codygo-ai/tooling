@@ -38,7 +38,7 @@ jobs:
           NAME="${SCOPE}${SLUG}"
           for f in packages/eslint/*/package.json packages/vite/*/package.json packages/*/package.json; do
             [ -f "$f" ] || continue
-            if grep -q "\"name\":\"${NAME}\"" "$f" 2>/dev/null; then
+            if grep -qE "\"name\"\s*:\s*\"${NAME}\"" "$f" 2>/dev/null; then
               echo "path=$(dirname "$f")" >> "$GITHUB_OUTPUT"
               exit 0
             fi
