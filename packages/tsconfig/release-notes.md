@@ -1,3 +1,3 @@
-## Patch Release
+## Version bump to 0.1.7-alpha
 
-- Version bump to 0.1.6-alpha (no functional changes)
+- Bump package version to 0.1.7-alpha

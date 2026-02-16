@@ -1,6 +1,6 @@
 {
   "name": "@codygo-ai/tsconfig",
-  "version": "0.1.6-alpha",
+  "version": "0.1.7-alpha",
   "exports": {
     "./base.json": "./base.json",
     "./react.json": "./react.json",
