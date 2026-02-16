@@ -1,0 +1,7 @@
+{
+  "extends": "./node.json",
+  "compilerOptions": {
+    "types": ["node", "@types/aws-lambda"]
+  }
+}
+

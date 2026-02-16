@@ -1,0 +1,23 @@
+{
+  "name": "@codygo-ai/eslint-plugin-mono",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "scripts": {
+    "test": "node test/run-tests.mjs",
+    "lint": "eslint src --max-warnings 0"
+  },
+  "dependencies": {
+    "@typescript-eslint/utils": "^8.0.0",
+    "find-up": "^7.0.0"
+  },
+  "devDependencies": {
+    "jsonc-eslint-parser": "^2.4.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
