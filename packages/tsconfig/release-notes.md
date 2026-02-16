@@ -1,8 +1,5 @@
-Based on the commit history and the lack of code changes in this package, this appears to be a version bump with no functional changes to the tsconfig package itself. Here are the release notes:
+Since there are no commits or changes between the previous tag `tsconfig/v0.1.8-alpha` and the current state, this appears to be a stable release from the alpha version.
 
----
+## Release 0.1.8
 
-## Version bump
-
-- No changes to package configuration
-- Release automation update in parent repository workflow
+- Stable release from v0.1.8-alpha
