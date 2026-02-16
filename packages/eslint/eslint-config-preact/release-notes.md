@@ -1,6 +1,4 @@
-# Initial Alpha Release
+## v0.1.0 - Initial Stable Release
 
-- Initial release of ESLint configuration for Preact projects
-- Base ESLint configuration setup with proper package metadata
-- Integrated with monorepo tooling and release workflow
-- Published as public package on npm
+- Promoted from alpha to stable release
+- No breaking changes from v0.1.0-alpha

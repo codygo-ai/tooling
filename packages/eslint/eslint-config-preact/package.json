@@ -1,6 +1,6 @@
 {
   "name": "@codygo-ai/eslint-config-preact",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0",
   "type": "module",
   "exports": {
     ".": "./src/index.mjs"
