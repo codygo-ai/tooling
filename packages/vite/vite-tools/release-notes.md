@@ -1,5 +1,5 @@
-## Initial alpha release
+Since there are no commits and no changes between the previous alpha release and now, this appears to be a version bump from alpha to stable:
 
-- Add comprehensive README with installation, usage, and development instructions
-- Document Vite 5.x and 6.x peer dependency requirements
-- Include build, lint, and typecheck workflow documentation
+## Stable Release
+
+- Promote v0.2.0-alpha to stable v0.2.0

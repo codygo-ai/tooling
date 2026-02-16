@@ -1,6 +1,6 @@
 {
   "name": "@codygo-ai/vite-tools",
-  "version": "0.2.0-alpha",
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
