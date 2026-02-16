@@ -69,10 +69,12 @@ jobs:
             echo "Release notes file not found: $NOTES_FILE"
             exit 1
           fi
-          DELIM="release_notes_eof_$(date +%s)"
-          echo "body<<$DELIM" >> "$GITHUB_OUTPUT"
-          cat "$NOTES_FILE" >> "$GITHUB_OUTPUT"
-          echo "$DELIM" >> "$GITHUB_OUTPUT"
+          DELIM="release_notes_eof_$(date +%s)_${RANDOM}_$(openssl rand -hex 8)"
+          {
+            echo "body<<$DELIM"
+            cat "$NOTES_FILE"
+            printf '\n%s\n' "$DELIM"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
