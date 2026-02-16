@@ -1,6 +1,4 @@
-# Initial Release
+## First stable release
 
-- Initial release of ESLint plugin for monorepo tooling
-- Added package configuration and build setup
-- Configured GitHub Actions release workflow
-- Set up package for public npm registry
+- Initial stable release (v0.1.0) of @codygo-ai/eslint-plugin-mono
+- Graduated from alpha to production-ready
