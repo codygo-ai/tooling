@@ -1,3 +1,3 @@
-# Initial Release
+## Stable Release
 
-- Add initial README documentation for ESLint React configuration and TypeScript settings
+- Promoted from alpha to stable release (0.2.0-alpha → 0.2.0)
