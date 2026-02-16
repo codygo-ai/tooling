@@ -89,19 +89,20 @@ jobs:
         run: |
           SLUG="${{ steps.parse.outputs.slug }}"
           VERSION="${{ steps.parse.outputs.version }}"
+          PUBLISH_LOG=$(mktemp)
+          trap "rm -f '$PUBLISH_LOG'" EXIT
           if [[ "$VERSION" == *"-alpha" ]]; then
-            OUT=$(pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --tag alpha 2>&1)
+            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --tag alpha 2>&1 | tee "$PUBLISH_LOG"
           else
-            OUT=$(pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks 2>&1)
+            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks 2>&1 | tee "$PUBLISH_LOG"
           fi
-          EXIT=$?
-          echo "$OUT"
+          EXIT=${PIPESTATUS[0]}
           if [[ $EXIT -ne 0 ]]; then
-            echo "::error::pnpm publish failed (exit $EXIT)"
+            echo "::error::pnpm publish failed (exit $EXIT). See stdout/stderr above."
             exit $EXIT
           fi
-          if echo "$OUT" | grep -q "There are no new packages that should be published"; then
-            echo "::error::No package was published (package may be private or version already exists)"
+          if grep -q "There are no new packages that should be published" "$PUBLISH_LOG"; then
+            echo "::error::No package was published (package may be private or version already exists). See stdout/stderr above."
             exit 1
           fi
         env:
