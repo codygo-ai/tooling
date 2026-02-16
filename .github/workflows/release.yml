@@ -95,9 +95,9 @@ jobs:
           PUBLISH_LOG=$(mktemp)
           trap "rm -f '$PUBLISH_LOG'" EXIT
           if [[ "$VERSION" == *"-alpha" ]]; then
-            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --tag alpha 2>&1 | tee "$PUBLISH_LOG"
+            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --access public --tag alpha 2>&1 | tee "$PUBLISH_LOG"
           else
-            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks 2>&1 | tee "$PUBLISH_LOG"
+            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --access public 2>&1 | tee "$PUBLISH_LOG"
           fi
           EXIT=${PIPESTATUS[0]}
           if [[ $EXIT -ne 0 ]]; then
