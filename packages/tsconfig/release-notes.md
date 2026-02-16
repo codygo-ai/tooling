@@ -1,3 +1,3 @@
-# Release v0.1.3-alpha
+# Release Notes: @codygo-ai/tsconfig v0.1.4-alpha
 
-- No changes in this release
+- Remove private flag from package.json to enable npm publishing
