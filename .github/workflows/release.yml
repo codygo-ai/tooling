@@ -90,9 +90,19 @@ jobs:
           SLUG="${{ steps.parse.outputs.slug }}"
           VERSION="${{ steps.parse.outputs.version }}"
           if [[ "$VERSION" == *"-alpha" ]]; then
-            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --tag alpha
+            OUT=$(pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --tag alpha 2>&1)
           else
-            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks
+            OUT=$(pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks 2>&1)
+          fi
+          EXIT=$?
+          echo "$OUT"
+          if [[ $EXIT -ne 0 ]]; then
+            echo "::error::pnpm publish failed (exit $EXIT)"
+            exit $EXIT
+          fi
+          if echo "$OUT" | grep -q "There are no new packages that should be published"; then
+            echo "::error::No package was published (package may be private or version already exists)"
+            exit 1
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.CODYGO_AI_NPM_TOKEN }}

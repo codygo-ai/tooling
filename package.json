@@ -1,7 +1,6 @@
 {
   "name": "@codygo-ai/tooling",
   "version": "0.0.0",
-  "private": true,
   "description": "Codygo-ai tooling monorepo",
   "scripts": {
     "validate": "turbo run lint && turbo run typecheck",
