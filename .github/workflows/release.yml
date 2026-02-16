@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*/v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Parse tag
+        id: parse
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          SLUG="${TAG%/*}"
+          VERSION="${TAG##*/v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-alpha)?$ ]]; then
+            echo "Tag version part must be X.Y.Z or X.Y.Z-alpha: $TAG"
+            exit 1
+          fi
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find package path
+        id: pkgpath
+        run: |
+          SLUG="${{ steps.parse.outputs.slug }}"
+          SCOPE="@codygo-ai/"
+          NAME="${SCOPE}${SLUG}"
+          for f in packages/eslint/*/package.json packages/vite/*/package.json packages/*/package.json; do
+            [ -f "$f" ] || continue
+            if grep -q "\"name\":\"${NAME}\"" "$f" 2>/dev/null; then
+              echo "path=$(dirname "$f")" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "Package not found for slug: $SLUG"
+          exit 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Read release notes
+        id: notes
+        run: |
+          NOTES_FILE="${{ steps.pkgpath.outputs.path }}/release-notes.md"
+          if [ ! -f "$NOTES_FILE" ]; then
+            echo "Release notes file not found: $NOTES_FILE"
+            exit 1
+          fi
+          DELIM="release_notes_eof_$(date +%s)"
+          echo "body<<$DELIM" >> "$GITHUB_OUTPUT"
+          cat "$NOTES_FILE" >> "$GITHUB_OUTPUT"
+          echo "$DELIM" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.parse.outputs.tag }}
+          body: ${{ steps.notes.outputs.body }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm
+        run: |
+          SLUG="${{ steps.parse.outputs.slug }}"
+          VERSION="${{ steps.parse.outputs.version }}"
+          if [[ "$VERSION" == *"-alpha" ]]; then
+            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks --tag alpha
+          else
+            pnpm publish --filter "@codygo-ai/${SLUG}" --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.CODYGO_AI_NPM_TOKEN }}
