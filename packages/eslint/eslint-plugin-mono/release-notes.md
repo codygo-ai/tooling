@@ -1,6 +1,3 @@
-Since there are no commits or changes between the previous tag (`eslint-plugin-mono/v0.2.0-alpha`) and the current state, this appears to be a stable release promotion from alpha to stable.
+## @codygo-ai/eslint-plugin-mono v0.3.0-alpha
 
-## Stable Release
-
-- Promote v0.2.0-alpha to stable v0.2.0
-- No functional changes from v0.2.0-alpha
+- Add `require-env-prefix` rule: enforces a configurable prefix (default `CDG_`) on app-specific environment variables, with an allowlist for standard infra/third-party vars (exact names or glob patterns like `AWS_*`)

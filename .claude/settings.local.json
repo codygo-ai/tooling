@@ -5,7 +5,8 @@
       "Bash(git push:*)",
       "Bash(pnpm run release:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(CLAUDECODE= pnpm run release:*)"
     ]
   }
 }
