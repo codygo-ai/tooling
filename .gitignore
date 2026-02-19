@@ -13,6 +13,7 @@ build
 .test-files
 .test-results
 **/CLAUDE.md
+**/.claude/settings.local.json
 
 *.log
 log.*
