@@ -24,6 +24,7 @@ test('plugin exports all required rules', () => {
     'prefer-optional-chaining',
     'env-vars-at-top',
     'require-env-example',
+    'require-env-prefix',
     'no-dotenv',
     'index-exports-only',
   ];

@@ -21,6 +21,7 @@ import preferFunctionDeclaration from './rules/prefer-function-declaration.mjs';
 import preferMinimalChecks from './rules/prefer-minimal-checks.mjs';
 import preferOptionalChaining from './rules/prefer-optional-chaining.mjs';
 import requireEnvExample from './rules/require-env-example.mjs';
+import requireEnvPrefix from './rules/require-env-prefix.mjs';
 import requiredFiles from './rules/required-files.mjs';
 import workspaceProtocol from './rules/workspace-protocol.mjs';
 
@@ -44,6 +45,7 @@ export default {
     'prefer-optional-chaining': preferOptionalChaining,
     'env-vars-at-top': envVarsAtTop,
     'require-env-example': requireEnvExample,
+    'require-env-prefix': requireEnvPrefix,
     'no-dotenv': noDotenv,
     'index-exports-only': indexExportsOnly,
   },
