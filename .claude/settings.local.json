@@ -6,7 +6,9 @@
       "Bash(pnpm run release:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(CLAUDECODE= pnpm run release:*)"
+      "Bash(CLAUDECODE= pnpm run release:*)",
+      "Bash(git checkout:*)",
+      "Bash(unset:*)"
     ]
   }
 }
