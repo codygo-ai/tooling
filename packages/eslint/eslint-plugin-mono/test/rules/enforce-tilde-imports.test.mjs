@@ -70,13 +70,13 @@ ruleTester.run('enforce-tilde-imports', rule, {
     // Apps: use tilde for cross-directory
     {
       filename: 'server/apps/api/src/auth/login.ts',
-      code: "import { profile } from '../../users/profile';",
+      code: "import { profile } from '../users/profile';",
       errors: [{ messageId: 'useTildeForCrossDir' }],
       output: "import { profile } from '~/users/profile';",
     },
     {
       filename: 'server/apps/api/src/auth/utils/validate.ts',
-      code: "import { helper } from '../../../shared/helpers';",
+      code: "import { helper } from '../../shared/helpers';",
       errors: [{ messageId: 'useTildeForCrossDir' }],
       output: "import { helper } from '~/shared/helpers';",
     },

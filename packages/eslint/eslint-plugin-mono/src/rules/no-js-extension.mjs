@@ -2,6 +2,7 @@
 export default {
   meta: {
     type: 'problem',
+    fixable: 'code',
     docs: {
       description: 'Disallow .js extension in import statements',
     },
@@ -21,6 +22,10 @@ export default {
           context.report({
             node: node.source,
             messageId: 'noJsExtension',
+            fix(fixer) {
+              const fixed = importPath.slice(0, -3);
+              return fixer.replaceText(node.source, `'${fixed}'`);
+            },
           });
         }
       },
