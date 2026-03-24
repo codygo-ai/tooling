@@ -1,3 +1,4 @@
-## @codygo-ai/eslint-plugin-mono v0.3.0
+# @codygo-ai/eslint-plugin-mono v0.4.0-alpha
 
-- Promote `0.3.0-alpha` to stable release
+- Enable 8 previously dormant ESLint rules
+- Remove dead `package-hierarchy` rule
