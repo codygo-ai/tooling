@@ -1,12 +1,7 @@
-## @codygo-ai/eslint-config-base v0.3.0-alpha
+## @codygo-ai/eslint-config-base v0.3.0
 
-- Enable 8 previously dormant rules:
-  - `no-forbidden-imports` — index.ts sentinel guard
-  - `index-exports-only` — no logic in index.ts
-  - `enforce-tilde-imports` — `~/` banned in libs, required in apps
-  - `app-error-required-props` — AppError must have cause/context/code
-  - `workspace-protocol` — internal deps must use `workspace:^`
-  - `no-dotenv` — use `--env-file-if-exists` instead
-  - `require-env-example` — configurable filename, apps-only scope
-  - `package-json-schema` — base required fields/scripts
-- Remove dead `package-hierarchy` rule
+Stable release of v0.3.0-alpha with no additional changes.
+
+- **Enable 8 dormant rules:** `no-forbidden-imports`, `index-exports-only`, `enforce-tilde-imports`, `app-error-required-props`, `workspace-protocol`, `no-dotenv`, `require-env-example`, `package-json-schema`
+- **Remove dead `package-hierarchy` rule** (was internally disabled)
+- **Enhance `require-env-example`** with configurable filename and apps-only scope
