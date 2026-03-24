@@ -5,6 +5,7 @@ import { parsePackageJson, getProperty, getObjectEntries } from '../utils/packag
 export default {
   meta: {
     type: 'problem',
+    fixable: 'code',
     docs: {
       description: 'Enforce workspace protocol for internal dependencies',
     },
@@ -54,6 +55,9 @@ export default {
                   node: versionNode,
                   messageId: 'wrongProtocol',
                   data: { name, protocol: config.protocol, actual: version },
+                  fix(fixer) {
+                    return fixer.replaceText(versionNode, `"${config.protocol}"`);
+                  },
                 });
               }
             }

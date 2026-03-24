@@ -11,7 +11,7 @@ const ruleTester = new EnhancedRuleTester({
 ruleTester.run('index-exports-only', rule, {
   valid: [
     {
-      name: 'index.ts with only exports - should pass',
+      name: 'index.ts with local re-exports',
       filename: 'src/components/index.ts',
       code: `
         export { default as Button } from './Button';
@@ -19,29 +19,26 @@ ruleTester.run('index-exports-only', rule, {
       `,
     },
     {
-      name: 'index.ts with only named exports - should pass',
+      name: 'index.ts with export * from local',
       filename: 'src/utils/index.ts',
       code: `
-        export { formatDate } from './formatDate';
-        export { parseDate } from './parseDate';
+        export * from './formatDate';
+        export * from './parseDate';
       `,
     },
     {
-      name: 'index.ts with imports and exports - should pass',
+      name: 'index.ts with named re-exports from local',
       filename: 'src/api/index.ts',
       code: `
-        import { client } from './client';
-        export { client };
-        export { fetchUser } from './endpoints';
+        export { Config } from './config';
+        export * from './endpoints';
       `,
     },
     {
-      name: 'Non-index.ts file - should not be checked',
+      name: 'non-index file is not checked',
       filename: 'src/other.ts',
       code: `
-        function helper() {
-          return 'test';
-        }
+        function helper() { return 'test'; }
         export { helper };
       `,
     },
@@ -49,50 +46,59 @@ ruleTester.run('index-exports-only', rule, {
 
   invalid: [
     {
-      name: 'index.ts with function declaration - should report nonExportStatement',
-      filename: 'src/components/index.ts',
-      code: `
-        export { default as Button } from './Button';
-        
-        function processEvent(event) {
-          return event.type;
-        }
-        
-        export { processEvent };
-      `,
-      errors: [
-        {
-          messageId: 'nonExportStatement',
-        },
-      ],
-    },
-    {
-      name: 'index.ts with variable declaration - should report nonExportStatement',
+      name: 'index.ts with variable declaration',
       filename: 'src/utils/index.ts',
       code: `
         const helper = 'test';
         export { helper };
       `,
-      errors: [
-        {
-          messageId: 'nonExportStatement',
-        },
-      ],
+      errors: [{ messageId: 'nonExportStatement' }],
     },
     {
-      name: 'index.ts with class declaration - should report nonExportStatement',
+      name: 'index.ts with function declaration',
+      filename: 'src/components/index.ts',
+      code: `
+        export { default as Button } from './Button';
+        function processEvent(event) { return event.type; }
+        export { processEvent };
+      `,
+      errors: [{ messageId: 'nonExportStatement' }],
+    },
+    {
+      name: 'index.ts with class declaration',
       filename: 'src/api/index.ts',
       code: `
-        class ApiClient {
-          constructor() {}
-        }
+        class ApiClient { constructor() {} }
         export { ApiClient };
       `,
-      errors: [
-        {
-          messageId: 'nonExportStatement',
-        },
-      ],
+      errors: [{ messageId: 'nonExportStatement' }],
+    },
+    {
+      name: 'index.ts re-exporting from external npm package',
+      filename: 'src/hooks/index.ts',
+      code: `
+        export { useDomRef } from '@worknet/preact-utils';
+        export { useClickOutside } from './useClickOutside';
+      `,
+      errors: [{ messageId: 'externalReExport' }],
+    },
+    {
+      name: 'index.ts re-exporting from workspace package',
+      filename: 'src/index.ts',
+      code: `
+        export * from '@worknet/some-lib';
+        export * from './local';
+      `,
+      errors: [{ messageId: 'externalReExport' }],
+    },
+    {
+      name: 'index.ts named export from external',
+      filename: 'src/index.ts',
+      code: `
+        export { SomeType } from 'external-lib';
+        export * from './local';
+      `,
+      errors: [{ messageId: 'externalReExport' }],
     },
   ],
 });

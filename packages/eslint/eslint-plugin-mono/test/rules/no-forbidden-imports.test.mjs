@@ -1,141 +1,229 @@
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 
-import { RuleTester } from 'eslint';
-
 import rule from '../../src/rules/no-forbidden-imports.mjs';
+import { EnhancedRuleTester } from '../utils/enhanced-rule-tester.mjs';
 
-const ruleTester = new RuleTester({
+const ruleTester = new EnhancedRuleTester({
   languageOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
 });
 
-// Create test fixtures for index.ts enforcement
-const testDir = join(process.cwd(), 'test/fixtures/index-ts-test');
+// ── Fixtures: real directory structures ──────────────────────────────
+
+const testDir = join(process.cwd(), 'test/fixtures/forbidden-imports-test');
 
 function setupFixtures() {
   try {
     rmSync(testDir, { recursive: true, force: true });
   } catch {
-    // Ignore errors when cleaning up test directory
+    // ignore
   }
 
-  // Create structure with index.ts
-  mkdirSync(join(testDir, 'with-index/components'), { recursive: true });
-  writeFileSync(
-    join(testDir, 'with-index/components/index.ts'),
-    'export { Button } from "./Button";'
-  );
-  writeFileSync(
-    join(testDir, 'with-index/components/Button.tsx'),
-    'export const Button = () => null;'
-  );
-  writeFileSync(
-    join(testDir, 'with-index/components/Input.tsx'),
-    'export const Input = () => null;'
-  );
-  writeFileSync(join(testDir, 'with-index/app.tsx'), '');
+  // Module with sentinel (index.ts)
+  mkdirSync(join(testDir, 'src/hooks'), { recursive: true });
+  writeFileSync(join(testDir, 'src/hooks/index.ts'), 'export { useClick } from "./useClick";');
+  writeFileSync(join(testDir, 'src/hooks/useClick.ts'), 'export function useClick() {}');
+  writeFileSync(join(testDir, 'src/hooks/useHover.ts'), 'export function useHover() {}');
 
-  // Create structure without index.ts
-  mkdirSync(join(testDir, 'without-index/utils'), { recursive: true });
-  writeFileSync(
-    join(testDir, 'without-index/utils/helper.ts'),
-    'export const helper = () => null;'
-  );
-  writeFileSync(join(testDir, 'without-index/app.tsx'), '');
+  // Module without sentinel (common dir, no index.ts)
+  mkdirSync(join(testDir, 'src/common'), { recursive: true });
+  writeFileSync(join(testDir, 'src/common/types.ts'), 'export type Foo = string;');
+  writeFileSync(join(testDir, 'src/common/utils.ts'), 'export function helper() {}');
 
-  // Create workspace package structure
-  mkdirSync(join(testDir, 'workspace/common/libs/models/src/user'), { recursive: true });
-  writeFileSync(
-    join(testDir, 'workspace/common/libs/models/src/index.ts'),
-    'export { User } from "./user";'
-  );
-  writeFileSync(
-    join(testDir, 'workspace/common/libs/models/src/user/index.ts'),
-    'export class User {}'
-  );
-  writeFileSync(
-    join(testDir, 'workspace/common/libs/models/src/user/User.ts'),
-    'export class User {}'
-  );
-  writeFileSync(
-    join(testDir, 'workspace/common/libs/models/package.json'),
-    '{"name": "@codygo-ai/models"}'
-  );
-  writeFileSync(join(testDir, 'workspace/package.json'), '{"name": "@codygo-ai/mono"}');
-  writeFileSync(join(testDir, 'workspace/app.tsx'), '');
+  // Nested module with sentinel
+  mkdirSync(join(testDir, 'src/Chat'), { recursive: true });
+  writeFileSync(join(testDir, 'src/Chat/index.ts'), 'export { Chat } from "./Chat";');
+  writeFileSync(join(testDir, 'src/Chat/Chat.tsx'), 'export function Chat() {}');
+  writeFileSync(join(testDir, 'src/Chat/useChat.ts'), 'export function useChat() {}');
+  writeFileSync(join(testDir, 'src/Chat/reducer.ts'), 'export function reducer() {}');
+
+  // Root sentinel
+  writeFileSync(join(testDir, 'src/index.ts'), 'export * from "./Chat";');
+
+  // Consumer file outside modules
+  writeFileSync(join(testDir, 'src/app.ts'), '');
+
+  // Deep nested consumer
+  mkdirSync(join(testDir, 'src/features/settings'), { recursive: true });
+  writeFileSync(join(testDir, 'src/features/settings/page.ts'), '');
 }
 
 function cleanupFixtures() {
   try {
     rmSync(testDir, { recursive: true, force: true });
   } catch {
-    // Ignore errors when cleaning up test directory
+    // ignore
   }
 }
 
 setupFixtures();
 
+// ── Pattern-based tests (no filesystem needed) ──────────────────────
+
 ruleTester.run('no-forbidden-imports', rule, {
   valid: [
+    // Direct file imports
+    { code: "import { User } from '@codygo-ai/models';" },
+    { code: "import { helper } from './utils/helper';" },
+    { code: "import { helper } from '../common/helper';" },
+    { code: "import { X } from '../events';" },
+    { code: "import { X } from '../../common/types';" },
+    { code: "import { capitalize } from '@codygo-ai/utils/string';" },
+    // Re-exports from local files
+    { code: "export * from './socketIOTransport';" },
+    { code: "export { Foo } from './types';" },
+    // Directory import through sentinel — correct external usage
+    { code: "import { Button } from './components';" },
+    { code: "import { useChat } from '../Chat';" },
+
+    // ── Fixture-based: correct patterns ──
+
+    // Sibling file inside same dir (no sentinel involved)
     {
-      code: "import { User } from '@codygo-ai/models';",
+      name: 'sibling import inside Chat/ — direct file, no sentinel',
+      code: "import { reducer } from './reducer';",
+      filename: join(testDir, 'src/Chat/Chat.tsx'),
     },
+    // Import from common/ (no sentinel) — direct file
     {
-      code: "import { shared } from '../shared/utils';",
+      name: 'import from common/ (no index.ts) — direct file',
+      code: "import { helper } from '../common/utils';",
+      filename: join(testDir, 'src/Chat/Chat.tsx'),
     },
+    // External consumer imports through sentinel directory
     {
-      code: "import { capitalize } from '@codygo-ai/utils/string';",
+      name: 'app imports through Chat/ sentinel',
+      code: "import { Chat } from './Chat';",
+      filename: join(testDir, 'src/app.ts'),
     },
-    // Valid: Import from directory when index.ts exists
+    // External consumer imports through hooks/ sentinel
     {
-      code: "import { Button } from './components';",
-      filename: join(testDir, 'with-index/app.tsx'),
+      name: 'app imports through hooks/ sentinel',
+      code: "import { useClick } from './hooks';",
+      filename: join(testDir, 'src/app.ts'),
     },
-    // Valid: Import from file when index.ts does NOT exist
+    // Deep consumer imports common/ directly (no sentinel)
     {
-      code: "import { helper } from './utils/helper';",
-      filename: join(testDir, 'without-index/app.tsx'),
+      name: 'deep consumer imports common/ file directly',
+      code: "import { helper } from '../../common/utils';",
+      filename: join(testDir, 'src/features/settings/page.ts'),
     },
   ],
 
   invalid: [
+    // ── Pattern-based: bare dot/dotdot ──
+    { name: '.', code: "import X from '.';", errors: [{ messageId: 'noIndexResolving' }] },
+    { name: './', code: "import X from './';", errors: [{ messageId: 'noIndexResolving' }] },
+    { name: '..', code: "import { X } from '..';", errors: [{ messageId: 'noIndexResolving' }] },
+    { name: '../', code: "import { X } from '../';", errors: [{ messageId: 'noIndexResolving' }] },
     {
-      code: "import { User } from '@codygo-ai/models/index';",
-      errors: [{ messageId: 'noIndexImport' }],
-      output: "import { User } from '@codygo-ai/models';",
+      name: '../..',
+      code: "import { X } from '../..';",
+      errors: [{ messageId: 'noIndexResolving' }],
     },
     {
-      code: "import { helper } from './utils/index';",
-      errors: [{ messageId: 'noIndexImport' }],
-      output: "import { helper } from './utils';",
+      name: '../../..',
+      code: "import { X } from '../../..';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+
+    // ── Pattern-based: explicit /index ──
+    {
+      name: './index',
+      code: "import { X } from './index';",
+      errors: [{ messageId: 'noIndexResolving' }],
     },
     {
-      code: "import something from '.';",
-      errors: [{ messageId: 'noDotImport' }],
+      name: '../index',
+      code: "import { X } from '../index';",
+      errors: [{ messageId: 'noIndexResolving' }],
     },
     {
-      code: "import something from './';",
-      errors: [{ messageId: 'noDotSlashImport' }],
+      name: '../../index',
+      code: "import { X } from '../../index';",
+      errors: [{ messageId: 'noIndexResolving' }],
     },
     {
+      name: './foo/index',
+      code: "import { X } from './foo/index';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+    {
+      name: '@scope/pkg/index',
+      code: "import { X } from '@codygo-ai/models/index';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+
+    // ── Pattern-based: trailing slash ──
+    {
+      name: './foo/',
+      code: "import { X } from './foo/';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+    {
+      name: '../foo/',
+      code: "import { X } from '../foo/';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+
+    // ── Pattern-based: bare index ──
+    {
+      name: 'index',
+      code: "import { X } from 'index';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+
+    // ── Pattern-based: export statements ──
+    {
+      name: 'export from ..',
+      code: "export { Foo } from '..';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+    {
+      name: 'export * from ../index',
+      code: "export * from '../index';",
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+
+    // ── Pattern-based: /src in package paths ──
+    {
+      name: '@scope/pkg/src/user',
       code: "import { User } from '@codygo-ai/models/src/user';",
       errors: [{ messageId: 'noSrcImport' }],
     },
-    // Invalid: Import from file when index.ts exists
+
+    // ── Fixture-based: sentinel violations ──
+
+    // Importing through .. from inside Chat/ (resolves to src/index.ts sentinel)
     {
-      code: "import { Button } from './components/Button';",
-      filename: join(testDir, 'with-index/app.tsx'),
-      errors: [{ messageId: 'useIndexFile' }],
-      output: "import { Button } from './components';",
+      name: 'Chat/Chat.tsx imports from ".." — resolves through src/index.ts sentinel',
+      code: "import { something } from '..';",
+      filename: join(testDir, 'src/Chat/Chat.tsx'),
+      errors: [{ messageId: 'noIndexResolving' }],
     },
+    // Importing ../index explicitly from inside a module
     {
-      code: "import { Input } from './components/Input';",
-      filename: join(testDir, 'with-index/app.tsx'),
-      errors: [{ messageId: 'useIndexFile' }],
-      output: "import { Input } from './components';",
+      name: 'Chat/Chat.tsx imports from "../index" — explicit sentinel import',
+      code: "import { something } from '../index';",
+      filename: join(testDir, 'src/Chat/Chat.tsx'),
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+    // Importing ./hooks/index explicitly
+    {
+      name: 'app.ts imports from "./hooks/index" — explicit index',
+      code: "import { useClick } from './hooks/index';",
+      filename: join(testDir, 'src/app.ts'),
+      errors: [{ messageId: 'noIndexResolving' }],
+    },
+    // Deep consumer using .. chain to reach root sentinel
+    {
+      name: 'deep consumer imports "../.." — resolves through sentinel',
+      code: "import { Chat } from '../..';",
+      filename: join(testDir, 'src/features/settings/page.ts'),
+      errors: [{ messageId: 'noIndexResolving' }],
     },
   ],
 });

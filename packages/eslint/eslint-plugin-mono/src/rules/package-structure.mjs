@@ -6,6 +6,7 @@ import { parsePackagePath, isKebabCase } from '../utils/pathHelpers.mjs';
 export default {
   meta: {
     type: 'problem',
+    fixable: 'code',
     docs: {
       description: 'Enforce package directory structure and naming',
       category: 'Possible Errors',
@@ -81,6 +82,10 @@ export default {
               node: nameNode,
               messageId: 'nameMismatch',
               data: { expected: expectedName, actual: actualName },
+              fix(fixer) {
+                const valueNode = nameNode.value;
+                return fixer.replaceText(valueNode, JSON.stringify(expectedName));
+              },
             });
           }
         }

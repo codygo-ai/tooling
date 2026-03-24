@@ -2,6 +2,7 @@
 export default {
   meta: {
     type: 'suggestion',
+    fixable: 'code',
     docs: {
       description: 'Prefer minimal truthy/falsy checks over verbose null/undefined checks',
     },
@@ -97,10 +98,17 @@ export default {
         const suggestion = getSuggestion(node);
 
         if (suggestion) {
+          const fixReplacement = node.operator === '||'
+            ? `!${getVariableName(node.left)}`
+            : `!!${getVariableName(node.left)}`;
+
           context.report({
             node,
             messageId: 'preferMinimalCheck',
             data: { suggestion },
+            fix(fixer) {
+              return fixer.replaceText(node, fixReplacement);
+            },
           });
         }
       },

@@ -42,6 +42,7 @@ function isTypeScriptProject(packageDir) {
 export default {
   meta: {
     type: 'problem',
+    fixable: 'code',
     docs: {
       description: 'Enforce package.json schema based on package type',
     },
@@ -121,6 +122,31 @@ export default {
               node: fieldNode.value || fieldNode,
               messageId: 'forbiddenField',
               data: { field },
+              fix(fixer) {
+                const sourceCode = context.sourceCode;
+                const fullText = sourceCode.getText();
+                const propStart = fieldNode.range[0];
+                const propEnd = fieldNode.range[1];
+                let removeStart = propStart;
+                let removeEnd = propEnd;
+
+                // Remove trailing comma if present
+                const afterProp = fullText.slice(propEnd).match(/^\s*,/);
+                if (afterProp) {
+                  removeEnd = propEnd + afterProp[0].length;
+                } else {
+                  // Remove leading comma if this is not the first property
+                  const beforeProp = fullText.slice(0, propStart).match(/,\s*$/);
+                  if (beforeProp) {
+                    removeStart = propStart - beforeProp[0].length;
+                  }
+                }
+
+                // Trim surrounding whitespace
+                while (removeEnd < fullText.length && fullText[removeEnd] === ' ') removeEnd++;
+
+                return fixer.removeRange([removeStart, removeEnd]);
+              },
             });
           }
         }
