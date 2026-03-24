@@ -1,8 +1,12 @@
-Since there are no commits between the previous tag and HEAD, and no code changes (only the version bump in package.json), this appears to be a stable release promotion from the alpha version.
+## @codygo-ai/eslint-config-base v0.3.0-alpha
 
----
-
-## Stable Release
-
-- Promoted from v0.2.0-alpha to stable v0.2.0
-- No breaking changes or new features since alpha release
+- Enable 8 previously dormant rules:
+  - `no-forbidden-imports` — index.ts sentinel guard
+  - `index-exports-only` — no logic in index.ts
+  - `enforce-tilde-imports` — `~/` banned in libs, required in apps
+  - `app-error-required-props` — AppError must have cause/context/code
+  - `workspace-protocol` — internal deps must use `workspace:^`
+  - `no-dotenv` — use `--env-file-if-exists` instead
+  - `require-env-example` — configurable filename, apps-only scope
+  - `package-json-schema` — base required fields/scripts
+- Remove dead `package-hierarchy` rule
