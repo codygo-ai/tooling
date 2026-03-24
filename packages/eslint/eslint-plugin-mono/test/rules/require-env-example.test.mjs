@@ -10,7 +10,6 @@ const ruleTester = new EnhancedRuleTester({
   },
 });
 
-// Create test fixtures
 const testDir = join(process.cwd(), 'test/fixtures/env-example-test');
 
 function setupFixtures() {
@@ -20,15 +19,35 @@ function setupFixtures() {
     // Ignore errors when cleaning up test directory
   }
 
-  mkdirSync(join(testDir, 'with-env-example'), { recursive: true });
+  // App with .env.sample (default filename)
+  mkdirSync(join(testDir, 'client/apps/with-env-sample'), { recursive: true });
+  writeFileSync(join(testDir, 'client/apps/with-env-sample/.env.sample'), 'API_URL=\n');
   writeFileSync(
-    join(testDir, 'with-env-example/.env.example'),
-    'API_URL=https://api.example.com\n'
+    join(testDir, 'client/apps/with-env-sample/package.json'),
+    '{"name": "@codygo-ai/test"}'
   );
-  writeFileSync(join(testDir, 'with-env-example/package.json'), '{"name": "@codygo-ai/test"}');
 
-  mkdirSync(join(testDir, 'without-env-example'), { recursive: true });
-  writeFileSync(join(testDir, 'without-env-example/package.json'), '{"name": "@codygo-ai/test"}');
+  // App without .env.sample
+  mkdirSync(join(testDir, 'client/apps/without-env-sample'), { recursive: true });
+  writeFileSync(
+    join(testDir, 'client/apps/without-env-sample/package.json'),
+    '{"name": "@codygo-ai/test"}'
+  );
+
+  // Lib without .env.sample (should pass — appsOnly default is true)
+  mkdirSync(join(testDir, 'client/libs/some-lib'), { recursive: true });
+  writeFileSync(
+    join(testDir, 'client/libs/some-lib/package.json'),
+    '{"name": "@codygo-ai/test-lib"}'
+  );
+
+  // App with custom filename
+  mkdirSync(join(testDir, 'server/apps/custom-name'), { recursive: true });
+  writeFileSync(join(testDir, 'server/apps/custom-name/.env.example'), 'PORT=8080\n');
+  writeFileSync(
+    join(testDir, 'server/apps/custom-name/package.json'),
+    '{"name": "@codygo-ai/test"}'
+  );
 }
 
 function cleanupFixtures() {
@@ -44,20 +63,44 @@ setupFixtures();
 ruleTester.run('require-env-example', rule, {
   valid: [
     {
-      name: 'Package with .env.example - should pass',
-      filename: join(testDir, 'with-env-example/package.json'),
+      name: 'App with .env.sample - should pass',
+      filename: join(testDir, 'client/apps/with-env-sample/package.json'),
+      code: '{"name": "@codygo-ai/test"}',
+    },
+    {
+      name: 'Lib without .env.sample - should pass (appsOnly)',
+      filename: join(testDir, 'client/libs/some-lib/package.json'),
+      code: '{"name": "@codygo-ai/test-lib"}',
+    },
+    {
+      name: 'App with custom filename .env.example - should pass',
+      options: [{ filename: '.env.example' }],
+      filename: join(testDir, 'server/apps/custom-name/package.json'),
       code: '{"name": "@codygo-ai/test"}',
     },
   ],
 
   invalid: [
     {
-      name: 'Package without .env.example - should report missingEnvExample',
-      filename: join(testDir, 'without-env-example/package.json'),
+      name: 'App without .env.sample - should report missingEnvFile',
+      filename: join(testDir, 'client/apps/without-env-sample/package.json'),
       code: '{"name": "@codygo-ai/test"}',
       errors: [
         {
-          messageId: 'missingEnvExample',
+          messageId: 'missingEnvFile',
+          data: { filename: '.env.sample' },
+        },
+      ],
+    },
+    {
+      name: 'App with wrong filename when custom is required',
+      options: [{ filename: '.env.local' }],
+      filename: join(testDir, 'server/apps/custom-name/package.json'),
+      code: '{"name": "@codygo-ai/test"}',
+      errors: [
+        {
+          messageId: 'missingEnvFile',
+          data: { filename: '.env.local' },
         },
       ],
     },
