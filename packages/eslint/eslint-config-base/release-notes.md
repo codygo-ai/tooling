@@ -1,7 +1,5 @@
-## @codygo-ai/eslint-config-base v0.3.0
+The only change is the version bump, but this package depends on `@codygo-ai/eslint-plugin-mono` which received significant updates. The release picks up the new plugin version.
 
-Stable release of v0.3.0-alpha with no additional changes.
+## @codygo-ai/eslint-config-base v0.4.0-alpha
 
-- **Enable 8 dormant rules:** `no-forbidden-imports`, `index-exports-only`, `enforce-tilde-imports`, `app-error-required-props`, `workspace-protocol`, `no-dotenv`, `require-env-example`, `package-json-schema`
-- **Remove dead `package-hierarchy` rule** (was internally disabled)
-- **Enhance `require-env-example`** with configurable filename and apps-only scope
+- Bump `@codygo-ai/eslint-plugin-mono` to v0.5.0, picking up the rewritten `no-forbidden-imports` rule and external re-export banning in `index.ts` files
